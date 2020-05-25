@@ -50,7 +50,9 @@ Here is an example dashboard. You can import to your Grafana. This was made on G
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-
+## Homepage
+My homepage and contact info. Hello I'm Matthew Rogers!
+[https://matthewrogers.org/en/Layer2Exporter](https://matthewrogers.org/en/Layer2Exporter)
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+[GPL-3](https://choosealicense.com/licenses/gpl-3.0/)
