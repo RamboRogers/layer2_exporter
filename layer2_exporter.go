@@ -149,7 +149,7 @@ func scanSubnet(startAddress net.IP, endAddress net.IP, workingScan map[string]s
 		macAddress, _, _ := arping.Ping(ipAddress)
 
 		if len(macAddress) > 0 {
-			//fmt.Println(ipAddress, macAddress)
+			fmt.Println("SCAN:", ipAddress, macAddress)
 			workingScan[ipAddress.String()] = macAddress.String()
 		}
 
