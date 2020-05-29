@@ -14,6 +14,7 @@ Use go to install to your gopath.
 ```bash
 go get -u github.com/RamboRogers/layer2_exporter 
 ```
+**Alpine Server Install Instructions:** [INSTALL_ALPINE.md](./INSTALL_ALPINE.md)
 
 # Usage
 Compile using go, and execute with a CIDR block to begin scanning.  Scanning a /24 takes about 10-15 minutes. Scans will continue on a cycle forever. 
