@@ -85,9 +85,9 @@ func main() {
 	
 	//Server is parallel
 	go http.ListenAndServe(listenAddress, nil)
-	fmt.Println("Server is up....")
+	fmt.Println("Server is up....",listenAddress)
 
-	time.Sleep(30 * time.Second)
+	
 	//check for bad CIDR
 	_, ipv4Net, err := net.ParseCIDR(scanCidr)
 	if err != nil {
@@ -132,8 +132,8 @@ func main() {
 		finishedTime := time.Now()
 		fmt.Println("Total Scan Time:", finishedTime.Sub(startTime))
 		
-		//put a pause in scanning
-		time.Sleep(10 * time.Second)
+		//put a pause in scanning cycles
+		time.Sleep(1 * time.Second)
 	}
 
 }
