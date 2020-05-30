@@ -60,5 +60,13 @@ rc-update add layer2_exporter
 ### Screen Capture
 ![Running](screenshots/5.png)
 
+# Homepage / Contact
+My homepage and contact info. 
+
+| Type  | Data
+| ----- | --------
+| Homepage | <https://matthewrogers.org> |
+| XMPP | RamboRogers@trashserver.net |
+
 # FIN
 Thanks for reading.
