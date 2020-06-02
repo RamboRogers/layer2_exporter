@@ -4,7 +4,7 @@
 
    Author:   Matthew Rogers
    Date:     2020-05-25
-   License:  GPLv2
+   License:  GPLv3
 
    Revision: v1.0.0
 
@@ -20,6 +20,7 @@ import (
 	"net"
 	"net/http"
 	"time"
+
 	"github.com/apparentlymart/go-cidr/cidr"
 	"github.com/j-keck/arping"
 	"github.com/klauspost/oui"
@@ -46,7 +47,7 @@ func showMetrics(w http.ResponseWriter, req *http.Request) {
 
 	//{mac} ipaddress
 	for key, value := range completeScan {
-		
+
 		var ouiOut = ""
 
 		//lookup the OUI on render
@@ -59,14 +60,13 @@ func showMetrics(w http.ResponseWriter, req *http.Request) {
 			ouiOut = entry.Manufacturer
 		}
 
-
-		fmt.Fprintf(w, "layer2host{ip=\"%s\", mac=\"%s\", oui=\"%s\"} 1\n", key,value,ouiOut)
+		fmt.Fprintf(w, "layer2host{ip=\"%s\", mac=\"%s\", oui=\"%s\"} 1\n", key, value, ouiOut)
 	}
 }
 
 func main() {
 	//Let's create our maps!
-	
+
 	workingScan := make(map[string]string)
 
 	//take arguments
@@ -74,20 +74,18 @@ func main() {
 	scanCidr := flag.Arg(0)
 	targetSubnet = scanCidr
 	listenAddress := ":9095"
-	
+
 	//custom port and interface
 	if len(flag.Arg(1)) > 0 {
 		listenAddress = flag.Arg(1)
 	}
 
-
 	http.HandleFunc("/metrics", showMetrics)
-	
+
 	//Server is parallel
 	go http.ListenAndServe(listenAddress, nil)
-	fmt.Println("Server is up....",listenAddress)
+	fmt.Println("Server is up....", listenAddress)
 
-	
 	//check for bad CIDR
 	_, ipv4Net, err := net.ParseCIDR(scanCidr)
 	if err != nil {
@@ -112,7 +110,7 @@ func main() {
 		//scan finished
 		println("*SCAN DONE*")
 		for key, value := range workingScan {
-			println("key:",key,"value:",value)
+			println("key:", key, "value:", value)
 		}
 
 		//wipe the prior scan
@@ -131,7 +129,7 @@ func main() {
 		}
 		finishedTime := time.Now()
 		fmt.Println("Total Scan Time:", finishedTime.Sub(startTime))
-		
+
 		//put a pause in scanning cycles
 		time.Sleep(1 * time.Second)
 	}
@@ -139,18 +137,30 @@ func main() {
 }
 
 //this is the scan function
+// must add retry/timeout function here, something not right in Alpine and loop pauses sometimes.
 func scanSubnet(startAddress net.IP, endAddress net.IP, workingScan map[string]string) {
 
 	//Go Through IP Address Range
 	for ipAddress := startAddress; bytes.Compare(ipAddress, cidr.Inc(endAddress)) != 0; ipAddress = cidr.Inc(ipAddress) {
 
+		channel1 := make(chan string, 1)
 		arping.SetTimeout(100 * time.Millisecond)
 
-		macAddress, _, _ := arping.Ping(ipAddress)
+		//lets go!
+		go func() {
+			macAddress, _, _ := arping.Ping(ipAddress)
+			channel1 <- macAddress.String()
+		}()
 
-		if len(macAddress) > 0 {
-			fmt.Println("SCAN:", ipAddress, macAddress)
-			workingScan[ipAddress.String()] = macAddress.String()
+		//this will timeout if the ping hangs.
+		select {
+		case macAddress := <-channel1:
+			if len(macAddress) > 0 {
+				fmt.Println("SCAN:", ipAddress, macAddress)
+				workingScan[ipAddress.String()] = macAddress
+			}
+		case <-time.After(2 * time.Second):
+			fmt.Println("ERROR in ARP-Ping")
 		}
 
 	}
